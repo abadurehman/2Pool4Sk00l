@@ -21,39 +21,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 /**
  * Created by SrinjoyMajumdar on 5/4/15.
  */
-public class MainMenuScreen implements Screen {
+public class MainMenuScreen extends GameScreen {
     final Pool game;
-    Texture background;
-    Sprite bgSprite;
-    OrthographicCamera camera;
     TextButton quit;
-    Stage stage;
     Skin skin;
     TextureAtlas atlas;
 
-
-    private static final float BUTTON_WIDTH = 300f;
-    private static final float BUTTON_HEIGHT = 60f;
-    private static final float BUTTON_SPACING = 10f;
-
-    TextButton.TextButtonStyle textButtonStyle;
-
     public MainMenuScreen(final Pool gam) {
-//         skin = new Skin(Gdx.files.internal("uiskin.json"));
-        stage = new Stage();
-
+        super(gam);
         game = gam;
-        Gdx.input.setInputProcessor(stage);
-
-
-        camera = new OrthographicCamera();
-        background = new Texture(Gdx.files.internal("Background.png"));
-//        button = new TextButton("Test",);
-//        Image img = new Image(background);
-
-
-        bgSprite = new Sprite(background);
-        camera.setToOrtho(false, 1600, 900);
     }
 
 
@@ -64,20 +40,6 @@ public class MainMenuScreen implements Screen {
         skin.addRegions(atlas);
     }
 
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
-        game.batch.begin();
-        stage.draw();
-
-
-//        game.font.draw(game.batch, "2Pool4Skool", 800, 900 - game.font.getCapHeight());
-        game.batch.end();
-    }
 
     @Override
     public void resize(int width, int height) {
@@ -93,62 +55,26 @@ public class MainMenuScreen implements Screen {
         quit.addListener(new InputListener() {
             public boolean touchDown(InputEvent event, float x, float y,
                                      int pointer, int button) {
+
                 return true;
             }
 
             public void touchUp(InputEvent event, float x, float y,
                                 int pointer, int button) {
-
+                game.setScreen(new Person_Comp(game));
             }
         });
 
-
-        NinePatchDrawable patch = new NinePatchDrawable();
-
         Table table = new Table();
         table.setFillParent(true);
-        table.setBackground(new TextureRegionDrawable(new TextureRegion(background)));
-
-//        table.add(nameLabel);              // Row 0, column 0.
-
+        table.setBackground(new TextureRegionDrawable(new TextureRegion(super.background)));
 
         table.add(quit);    // Row 0, column 1.
 
-        stage.addActor(table);
+        super.stage.addActor(table);
 
 
     }
 
-    private NinePatch getNinePatch(String fname) {
-
-        // Get the image
-        final Texture t = new Texture(Gdx.files.internal(fname));
-
-        // create a new texture region, otherwise black pixels will show up too, we are simply cropping the image
-        // last 4 numbers respresent the length of how much can each corner can draw,
-        // for example if your image is 50px and you set the numbers 50, your whole image will be drawn in each corner
-        // so what number should be good?, well a little less than half would be nice
-        return new NinePatch(new TextureRegion(t, 1, 1, t.getWidth() - 2, t.getWidth() - 2), 10, 10, 10, 10);
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-
-    }
 }
 
