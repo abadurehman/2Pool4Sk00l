@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -21,19 +23,26 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 /**
  * Created by SrinjoyMajumdar on 5/4/15.
  */
-public class MainMenuScreen extends GameScreen {
+public class MainMenuScreen implements Screen {
     final Pool game;
     TextButton quit;
     Skin skin;
     TextureAtlas atlas;
+    Stage stage;
+    OrthographicCamera camera;
+    Texture background;
 
     public MainMenuScreen(final Pool gam) {
-        super(gam);
         game = gam;
+
+        stage = new Stage();
+        Gdx.input.setInputProcessor(stage);
+        camera = new OrthographicCamera();
+        background = new Texture(Gdx.files.internal("Background.png"));
+        camera.setToOrtho(false, 800, 480);
     }
 
 
-    @Override
     public void show() {
         atlas = new TextureAtlas("data/buttonpack.txt");
         skin = new Skin();
@@ -41,7 +50,18 @@ public class MainMenuScreen extends GameScreen {
     }
 
 
-    @Override
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        camera.update();
+        game.batch.setProjectionMatrix(camera.combined);
+        game.batch.begin();
+        stage.draw();
+        game.batch.end();
+
+    }
+
+
     public void resize(int width, int height) {
 
         TextButton.TextButtonStyle styleQuit = new TextButton.TextButtonStyle();
@@ -67,12 +87,32 @@ public class MainMenuScreen extends GameScreen {
 
         Table table = new Table();
         table.setFillParent(true);
-        table.setBackground(new TextureRegionDrawable(new TextureRegion(super.background)));
+        table.setBackground(new TextureRegionDrawable(new TextureRegion(background)));
 
         table.add(quit);    // Row 0, column 1.
 
-        super.stage.addActor(table);
+        stage.addActor(table);
 
+
+    }
+
+    @Override
+    public void pause() {
+
+    }
+
+    @Override
+    public void resume() {
+
+    }
+
+    @Override
+    public void hide() {
+
+    }
+
+    @Override
+    public void dispose() {
 
     }
 

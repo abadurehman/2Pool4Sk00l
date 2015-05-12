@@ -7,23 +7,31 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.input.GestureDetector;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Container;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.TimeUtils;
 
 import java.awt.Point;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 import java.util.Timer;
 
 /**
@@ -36,39 +44,49 @@ public class GameScreen implements Screen {
     Sprite bgSprite;
     OrthographicCamera camera;
     Stage stage;
-    Texture cue;
+    Ball cue;
     Rectangle cueRect;
     Texture stick;
     Rectangle stickRect;
+    Sprite sprite;
+    Ball[] poolBalls;
+    Sprite cueSprite;
     int change;
+    long lastDropTime = 0;
+    float angle = 0;
+    float lastangle;
+    GestureDetector detect;
+    Vector2 lastPos;
 
     public GameScreen(final Pool gam) {
         game = gam;
+
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
         camera = new OrthographicCamera();
+        camera.setToOrtho(false, 800, 480);
         background = new Texture(Gdx.files.internal("Background.png"));
         bgSprite = new Sprite(background);
-
-        cue = new Texture(Gdx.files.internal("cue.png"));
-        cueRect = new Rectangle();
-        cueRect.x = 1600 / 2 - 50 / 2; // center the bucket horizontally
-        cueRect.y = 800 / 2 - 50 / 2; // bottom left corner of the bucket is 20 pixels above
-        // the bottom screen edge
-        cueRect.width = 50;
-        cueRect.height = 50;
+        poolBalls = new Ball[16];
+        for (int i = 0; i < poolBalls.length; i++) {
+            poolBalls[i] = new Ball(i);
+            poolBalls[i].setX((int) (Math.random() * 800));
+            poolBalls[i].setY((int) (Math.random() * 480));
+        }
 
 
-        stick = new Texture(Gdx.files.internal("stick.png"));
-        stickRect = new Rectangle();
-        stickRect.width = 749;
-        stickRect.height = 29;
-        stickRect.y = cueRect.y + cueRect.height / 2 - stickRect.height / 2;
-        stickRect.x = cueRect.x + cueRect.width;
-        // the bottom screen edge
+//        stick = new Texture(Gdx.files.internal("stick.png"));
+//        stickRect = new Rectangle();
+//        stickRect.width = stick.getWidth();
+//        stickRect.height = stick.getHeight();
+//        stickRect.y = cue.getY() + cue.getHeight() / 2 - (stickRect.height / 2);
+//        stickRect.x = cue.getX() + cue.getWidth();
+//        // the bottom screen edge
+//           sprite = new Sprite(stick);
+//        lastPos = new Vector2(stickRect.x,stickRect.y);
 
 
-        camera.setToOrtho(false, 1600, 900);
+
     }
 
     @Override
@@ -77,42 +95,57 @@ public class GameScreen implements Screen {
     }
 
     public void render(float delta) {
+
+
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
+
         game.batch.begin();
         stage.draw();
         game.batch.end();
+
         game.batch.begin();
-        game.batch.draw(cue, cueRect.x, cueRect.y);
-        game.batch.draw(stick, stickRect.x, stickRect.y);
+//            cueSprite.setPosition(cueRect.x,cueRect.y);
+        //          cueSprite.draw(game.batch);
+//        cue.draw(game.batch);
+
+        for (int i = 0; i < poolBalls.length; i++) {
+            poolBalls[i].draw(game.batch);
+        }
+
+//        sprite.setPosition(cueSprite.getX()+cueSprite.getWidth(), cueSprite.getY()+cueSprite.getHeight()/2-sprite.getHeight()/2);
+//        sprite.setOrigin(-(cueSprite.getWidth()/2),sprite.getHeight()/2);
+
+//        if (Gdx.input.isTouched()) {
+//            Vector2 touchPos = new Vector2();
+//            touchPos.set(Gdx.input.getX(), Gdx.input.getY());
+//            System.out.println(touchPos.x +" "+ touchPos.y);
+//            sprite.setPosition(touchPos.x,stage.getHeight()-touchPos.y);
+//            angle = touchPos.angle(new Vector2(sprite.getX(),sprite.getY()));
+//            sprite.rotate(angle);
+//            lastangle= angle;
+//            lastPos = touchPos;
+//            Vector3 touchpos = new Vector3();
+//            touchpos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+//            camera.unproject(touchpos);
+//            angle -= Gdx.input.getDeltaX();
+//
+        //            float xDistance = touchPos.x - cueSprite.getOriginX();
+        //            float yDistance = touchPos.y - cueSprite.getOriginY();
+        ////            sprite.setRotation((float)Math.toDegrees(Math.atan2(yDistance, xDistance)));
+        //
+        //            sprite.setRotation ((int) (360 + Math.toDegrees(Math.atan2(yDistance, xDistance))) % 360);
+        //       }
+//        sprite.draw(game.batch);
         game.batch.end();
-
-
-        rotate(new Vector2(cueRect.x + cueRect.width / 2, cueRect.y + cueRect.height / 2), new Vector2(stickRect.x, stickRect.y - stickRect.height / 2), 0.01);
-
-
-        //  System.out.println(newPoint[0]+" "+newPoint[1]);
-//        stickRect.x=newPoint[0];
-//        stickRect.y = Math.abs(newPoint[1]);
-
-
     }
 
-
-    public void rotate(Vector2 center, Vector2 stick, double angle) {
-
-        float curAngle = stick.angle(center);
-        curAngle += angle;
-        float curDist = stick.dst(center);
-
-        stickRect.x = (float) (Math.cos(curAngle) * curDist) + center.x;
-        stickRect.y = (float) (Math.sin(curAngle) * curDist) + center.y;
-
-
+    public void rotate(Vector2 touchPos) {
+        double length = sprite.getWidth();
+        sprite.getY();
     }
-
 
     public void resize(int width, int height) {
         Table table = new Table();
