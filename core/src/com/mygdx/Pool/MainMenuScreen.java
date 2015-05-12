@@ -83,6 +83,7 @@ public class MainMenuScreen implements Screen {
                                 int pointer, int button) {
                 game.setScreen(new Person_Comp(game));
             }
+
         });
 
         Table table = new Table();
