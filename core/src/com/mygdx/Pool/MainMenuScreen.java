@@ -63,6 +63,7 @@ public class MainMenuScreen extends GameScreen {
                                 int pointer, int button) {
                 game.setScreen(new Person_Comp(game));
             }
+
         });
 
         Table table = new Table();
