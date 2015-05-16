@@ -34,6 +34,8 @@ import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
 import java.util.Timer;
 
+import sun.util.resources.cldr.ru.TimeZoneNames_ru;
+
 /**
  * Created by SrinjoyMajumdar on 5/5/15.
  */
@@ -118,7 +120,7 @@ public class GameScreen implements Screen {
 //        sprite.setPosition(cueSprite.getX()+cueSprite.getWidth(), cueSprite.getY()+cueSprite.getHeight()/2-sprite.getHeight()/2);
 //        sprite.setOrigin(-(cueSprite.getWidth()/2),sprite.getHeight()/2);
 
-//        if (Gdx.input.isTouched()) {
+        if (Gdx.input.isTouched()) {
 //            Vector2 touchPos = new Vector2();
 //            touchPos.set(Gdx.input.getX(), Gdx.input.getY());
 //            System.out.println(touchPos.x +" "+ touchPos.y);
@@ -132,12 +134,13 @@ public class GameScreen implements Screen {
 //            camera.unproject(touchpos);
 //            angle -= Gdx.input.getDeltaX();
 //
-        //            float xDistance = touchPos.x - cueSprite.getOriginX();
-        //            float yDistance = touchPos.y - cueSprite.getOriginY();
-        ////            sprite.setRotation((float)Math.toDegrees(Math.atan2(yDistance, xDistance)));
-        //
-        //            sprite.setRotation ((int) (360 + Math.toDegrees(Math.atan2(yDistance, xDistance))) % 360);
-        //       }
+//                    float xDistance = touchPos.x - cueSprite.getOriginX();
+//                    float yDistance = touchPos.y - cueSprite.getOriginY();
+//        //            sprite.setRotation((float)Math.toDegrees(Math.atan2(yDistance, xDistance)));
+//
+//                    sprite.setRotation ((int) (360 + Math.toDegrees(Math.atan2(yDistance, xDistance))) % 360);
+               }
+        TimeUtils
 //        sprite.draw(game.batch);
         game.batch.end();
     }
