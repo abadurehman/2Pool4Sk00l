@@ -1,0 +1,18 @@
+buttonpack.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+green
+  rotate: false
+  xy: 2, 2
+  size: 224, 72
+  orig: 224, 72
+  offset: 0, 0
+  index: -1
+red
+  rotate: false
+  xy: 228, 2
+  size: 224, 72
+  orig: 224, 72
+  offset: 0, 0
+  index: -1

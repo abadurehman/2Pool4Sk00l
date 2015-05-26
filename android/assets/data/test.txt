@@ -1,0 +1,18 @@
+test.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+A_button_by_Kutaly
+  rotate: false
+  xy: 2, 2
+  size: 96, 96
+  orig: 100, 99
+  offset: 2, 1
+  index: -1
+Pin_Template_by_Astar_Shadow
+  rotate: false
+  xy: 100, 2
+  size: 49, 50
+  orig: 50, 50
+  offset: 1, 0
+  index: -1

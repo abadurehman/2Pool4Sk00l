@@ -45,7 +45,7 @@ public class PoolTable extends Stage {
 
         slider.setX(50);
         slider.setY(50);
-
+        slider.setValue(10);
         super.addActor(slider);
         pockets = new Vector2[6];
         for (int i = 0; i < 3; i++) {
