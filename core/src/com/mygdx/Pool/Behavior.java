@@ -1,6 +1,4 @@
 package com.mygdx.Pool;
-
-import com.badlogic.gdx.math.Vector2;
 import com.sun.prism.Texture;
 
 import java.awt.Color;
@@ -18,8 +16,6 @@ public class Behavior
     private Color col;
     Ball bal;
     private static float VERT, HORIZ;
-    private static float FRICTION = (float) 0.75;
-    private static float COLLISION = (float) 0.5;
 
     public Behavior(Vector2 v, Ball bal)
     {
@@ -33,8 +29,7 @@ public class Behavior
     }
     public boolean isMoving()
     {
-//        return bal.velo.x != 0 || bal.velo.y != 0;
-        return false;
+        return bal.velo.x != 0 || bal.velo.y != 0;
     }
 
     /**
@@ -50,28 +45,27 @@ public class Behavior
 //    }
     public Vector2 magnitude(Ball a, Ball b)
     {
-//        return new Vector2(Math.sqrt(Math.pow(a.getCenterX() - b.getCenterX(),2)+ Math.pow(a.getCenterY() - b.getCenterY(), 2));
-        return null;
+        return new Vector2(Math.sqrt(Math.pow(a.getCenter().getX - b.getCenter().getX),2) + Math.pow(a.getCenter().getY - b.getCenter().getY, 2));
     }
     public Vector2 hitWall(float wall, Vector2 velo)
     {
-//        if (wall == VERT)
-//        {
-//            velo.x = -velo.x;
-//        }
-//        if (wall == HORIZ)
-//        {
-//            velo.y = -velo.y;
-//        }
-        return null;
+        if (wall == VERT)
+        {
+            velo.x = -velo.x;
+        }
+        if (wall == HORIZ)
+        {
+            velo.y = -velo.y;
+        }
+
     }
     //angle and power of ball1
     //vector of ball2
     public Vector2 hit(double angle, double pow, double angleOpp, double powOpp)
     {
-        Vector2 vect = new Vector2((float) (pow * Math.cos(angle)), (float) (pow * Math.sin(angle)));
-//        float collisionAngle = vect.angle(ball2);
-        return new Vector2((float) (powOpp * Math.sin(angleOpp) * COLLISION), (float) (powOpp * Math.cos(angleOpp) * COLLISION));
+        Vector2 vect = new Vector2((float)pow*Math.cos(angle), (float)pow*Math.sin(angle));
+        float collisionAngle = vect.angle(ball2);
+        return new Vector2((float)powOpp*Math.sin(angleOpp)*COLLISION, (float)powOpp*Math.cos(angleOpp)*COLLISION);
     }
 //    public Vector2 unit(Vector2 adsf, double pow)
 //    {
@@ -92,7 +86,6 @@ public class Behavior
 //        {
 //            velocity.x = -velocity.x*2;
 //            velocity.y = -velocity.y*2;
-
 //        }
 //    }
 
