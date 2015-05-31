@@ -48,7 +48,7 @@ public class MainMenuScreen implements Screen {
         camera = new OrthographicCamera();
         background = new Texture(Gdx.files.internal("Background.png"));
         camera.setToOrtho(false, 800, 480);
-        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("/System/Library/Fonts/MarkerFelt.ttc"));
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("MarkerFelt.ttc"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         parameter.size = 70;
         parameter.color = Color.WHITE;
@@ -57,18 +57,18 @@ public class MainMenuScreen implements Screen {
         atlas = new TextureAtlas("buttonpack2.txt");
         skin = new Skin();
         skin.addRegions(atlas);
+
         Table table = new Table();
         table.setFillParent(true);
+        table.add();
+        table.row();
         table.setBackground(new TextureRegionDrawable(new TextureRegion(background)));
+        table.add(createButton(("play"), Color.GREEN)).padRight(75).padTop(25);
+//        table.row();
+        table.add(createButton(("multi"), Color.GREEN)).padRight(75).padTop(25);// Row 0, column 1.
+//        table.row();
+        table.add(createButton(("settings"), Color.GREEN)).padTop(25);
 
-        Button button = createButton("", Color.BLACK);
-        table.add(createButton(("Person VS Person"), Color.GREEN));
-        table.row();
-        table.add(createButton(("Person VS Computer"), Color.GREEN));// Row 0, column 1.
-        table.row();
-        table.add(createButton(("Multiplayer"), Color.GREEN));
-        table.row();
-        table.add(createButton(("Settings"), Color.GREEN));
         stage.addActor(table);
     }
 
@@ -101,10 +101,11 @@ public class MainMenuScreen implements Screen {
 
     public Button createButton(String text, Color color) {
         Button.ButtonStyle style = new Button.ButtonStyle();
-        style.up = skin.getDrawable("multi");
-        style.down = skin.getDrawable("play");
+        style.up = skin.getDrawable(text);
+        style.down = skin.getDrawable(text);
 
         Button button = new Button(style);
+        button.setSize(10, 10);
         button.addListener(new InputListener() {
             public boolean touchDown(InputEvent event, float x, float y,
                                      int pointer, int button) {

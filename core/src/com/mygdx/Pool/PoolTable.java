@@ -41,11 +41,11 @@ public class PoolTable extends Stage {
         sliderStyle = new Slider.SliderStyle();
         sliderStyle.knob = skin.getDrawable("default-slider-knob");
         sliderStyle.background = skin.getDrawable("default-slider");
-        slider = new Slider((float) 0.0, (float) 10.0, (float) 0.1, true, sliderStyle);
+        slider = new Slider((float) 0.0, (float) 1.0, (float) 0.01, true, sliderStyle);
 
         slider.setX(50);
         slider.setY(50);
-        slider.setValue(10);
+        slider.setValue(1);
         super.addActor(slider);
         pockets = new Vector2[6];
         for (int i = 0; i < 3; i++) {

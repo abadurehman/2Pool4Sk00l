@@ -35,7 +35,8 @@ public class Person_Comp extends GameScreen {
     private static final float BUTTON_WIDTH = 300f;
     private static final float BUTTON_HEIGHT = 60f;
     private static final float BUTTON_SPACING = 10f;
-
+    private String playerName1 = "";
+    private String playerName2 = "";
     TextButton.TextButtonStyle textButtonStyle;
 
     public Person_Comp(final Pool gam) {
