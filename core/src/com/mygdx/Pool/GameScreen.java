@@ -1,31 +1,28 @@
 package com.mygdx.Pool;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.CircleShape;
+import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Array;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Stack;
 
 /**
  * Created by SrinjoyMajumdar on 5/5/15.
@@ -33,30 +30,37 @@ import java.util.Iterator;
 public class GameScreen implements Screen, InputProcessor {
 
     final Pool game;
-    final double margin = 0.1;
-    final float PIXELS_TO_METERS = 100f;
-    protected MouseJoint mouseJoint = null;
-    Sprite stick;
-    ArrayList<Ball> poolBalls;
-    ArrayList<Body> ballBodies;
-    PoolTable table;
-    World world;
-    Ball currBall;
-    Box2DDebugRenderer debugRenderer;
-    OrthographicCamera camera;
-    Matrix4 debugMatrix;
-    int screenHeight;
-    int screenWidth;
-    Ball cue;
-    float lineX;
-    float lineY;
-    Texture texture;
-    Rectangle t;
-    ShapeRenderer shapeRenderer;
+    private final float PIXELS_TO_METERS = 100f;
+    private ArrayList<Ball> poolBalls;
+    private ArrayList<Body> ballBodies;
+    private PoolTable table;
+    private World world;
+    private ShapeRenderer shapeRenderer;
+    private Box2DDebugRenderer debugRenderer;
+    private Matrix4 debugMatrix;
+    private OrthographicCamera camera;
+    private Rectangle t;
+
+    private int POWER_REDUCTION = 6000;
+
+    private int screenHeight;
+    private int screenWidth;
+    private Ball cue;
+    private float lineX;
+    private float lineY;
+    private boolean shot;
+    Player player1;
+    Player player2;
+    Player currPlayer;
+    Player watchPlayer;
+    boolean aligned = false;
+    int shotNum = 0;
+    int numPocketed = 0;
+    int temp = 0;
+    boolean cuePocket = false;
     public GameScreen(final Pool gam) {
 
         game = gam;
-
         screenHeight = Gdx.graphics.getHeight();
         screenWidth = Gdx.graphics.getWidth();
         world = new World(new Vector2(0, 0), true); //create world for physics
@@ -64,15 +68,15 @@ public class GameScreen implements Screen, InputProcessor {
         Gdx.input.setInputProcessor(this);
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.
                 getHeight());
+
         poolBalls = new ArrayList<Ball>(16);
         ballBodies = new ArrayList<Body>(16);
         createBall(0, -(Gdx.graphics.getWidth() / 2 - 537 * (screenWidth / 800)), -(Gdx.graphics.getHeight() / 2 - 197 * (screenHeight / 480)));
         lineX = poolBalls.get(0).getX();
         lineY = poolBalls.get(0).getY();
         cue = poolBalls.get(0);
-
         float x = -156 * (screenWidth / 800);
-        float y = -43 * (screenHeight / 800);
+        float y = -43 * (screenHeight / 480);
         int count2 = 1;
         for (int i = 1; i <= 5; i++) {
 
@@ -86,7 +90,10 @@ public class GameScreen implements Screen, InputProcessor {
             x -= cue.getWidth();
         }//create balls
 
-        stick = new Stick(); //new cue
+        player1 = new Player("p1", 1);
+        player2 = new Player("p2", 2);
+        currPlayer = player1;
+        watchPlayer = player2;
         createWallModels(); //create world walls
         debugRenderer = new Box2DDebugRenderer();
         shapeRenderer = new ShapeRenderer();
@@ -121,67 +128,107 @@ public class GameScreen implements Screen, InputProcessor {
             b.draw(game.batch);
             if (pocketed(b)) {
                 if (b.getNum() == 0) {
-                    poolBalls.remove(i);
-                    world.destroyBody(ballBodies.get(i));
-                    ballBodies.remove(i);
-                    createBall(0, -(Gdx.graphics.getWidth() / 2 - 537 * (screenWidth / 800)), -(Gdx.graphics.getHeight() / 2 - 197 * (screenHeight / 480)));
-
+                    cuePocket = true;
                 } else {
+                    currPlayer.scoredBall(b);
                     poolBalls.remove(i);
                     world.destroyBody(ballBodies.get(i));
                     ballBodies.remove(i);
                 }
             }
         }
+        int xp1 = -200;
+        int xp2 = 200;
 
-//        stick.setPosition(cue.getX() + cue.getWidth(), cue.getY()
-//                + cue.getHeight() / 2 - stick.getHeight() / 2);
-////        stick.setOrigin(-(cue.getWidth()/2),stick.getHeight()/2);
-//        stick.setOrigin(cue.getX(), cue.getY());
-//        float x = -(400 - cue.getX());
-//        float y = -(240 - cue.getY());
-        // stick.setPosition(cue.getX()+cue.getHeight()/2-stick.getHeight()/2,
-        // cue.getY()+cue.getHeight()/2-stick.getHeight()/2 );
+        for (Ball b : player1.getScoredBalls()) {
 
 
-//        stick.draw(game.batch);
+            b.setCenterX(xp1);
+            b.setCenterY(185);
+            b.draw(game.batch);
+            xp1 += b.getWidth();
+        }
+        for (Ball b : player2.getScoredBalls()) {
+            b.setCenterX(xp2);
+            b.setCenterY(185);
+            b.draw(game.batch);
+            xp2 -= b.getWidth();
+        }
+
         game.batch.end();
+
         if (Gdx.input.isTouched() && !table.getSlider().isDragging()) {
+
             Vector2 touchPos = new Vector2();
             touchPos.set(-(screenWidth / 2 - Gdx.input.getX()), (screenHeight / 2 - Gdx.input.getY()));
+            System.out.println(touchPos);
             lineX = touchPos.x;
             lineY = touchPos.y;
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
             shapeRenderer.setColor(1, 1, 0, 1);
+
             shapeRenderer.line((float) poolBalls.get(0).getX() + poolBalls.get(0).getWidth() / 2, (float) poolBalls.get(0).getY() + poolBalls.get(0).getHeight() / 2, (float) lineX, (float) lineY);
             shapeRenderer.end();
 
+
+        }
+        if (aligned && table.getSlider().getValue() != 1 && !table.getSlider().isDragging()) {
+            System.out.println("shot");
+            double val = table.getSlider().getValue();
+            table.getSlider().setValue(1);
+            int temp;
+            temp = POWER_REDUCTION;
+            POWER_REDUCTION *= val;
+
+            Vector2 line = new Vector2(lineX - cue.getHeight() / 2, lineY - cue.getHeight() / 2);
+            Vector2 power = new Vector2(-(poolBalls.get(0).getX() - line.x) / POWER_REDUCTION,
+                    -(poolBalls.get(0).getY() - line.y) / POWER_REDUCTION);
+            Vector2 position = new Vector2(ballBodies.get(0).getPosition().x + cue.getWidth() / 2,
+                    ballBodies.get(0).getPosition().y + cue.getWidth() / 2);
+            ballBodies.get(0).applyLinearImpulse(power, position, true);
+            Gdx.input.setInputProcessor(this);
+            aligned = false;
+            shot = true;
+            POWER_REDUCTION = temp;
+        }
+        if (shot) {
+            for (Contact c : world.getContactList()) {
+                if (c.isTouching()) {
+                    Ball a = (Ball) c.getFixtureA().getBody().getUserData();
+                    Ball b = (Ball) c.getFixtureB().getBody().getUserData();
+                    if (a != null && b != null && currPlayer.getType() != null) {
+                        if (a.getNum() == 0) {
+                            if (b.getNum() < 8 && currPlayer.getType().equals("striped") || b.getNum() > 8 && currPlayer.getType().equals("solid")) {
+                                Player temp = currPlayer;
+                                currPlayer = watchPlayer;
+                                watchPlayer = temp;
+                                System.out.println("switched");
+                                shot = false;
+                            }
+
+                        } else if (b.getNum() == 0) {
+                            if (a.getNum() < 8 && currPlayer.getType().equals("striped") || a.getNum() > 8 && currPlayer.getType().equals("solid")) {
+                                Player temp = currPlayer;
+                                currPlayer = watchPlayer;
+                                watchPlayer = temp;
+                                System.out.println("switched");
+                                shot = false;
+                            }
+                        }
+                    }
+                }
+            }
         }
         debugRenderer.render(world, debugMatrix);
-
     }
 
     public void resize(int width, int height) {
         screenHeight = Gdx.graphics.getHeight();
         screenWidth = Gdx.graphics.getWidth();
-
     }
 
 
-    @Override
-    public boolean keyUp(int keycode) {
-        if (keycode == Input.Keys.RIGHT)
-            ballBodies.get(0).setLinearVelocity(10f, 0f);
-        if (keycode == Input.Keys.LEFT)
-            ballBodies.get(0).setLinearVelocity(-10f, 0f);
-        if (keycode == Input.Keys.UP)
-            ballBodies.get(0).setLinearVelocity(0, 10f);
-        if (keycode == Input.Keys.DOWN)
-            ballBodies.get(0).setLinearVelocity(0f, -10f);
-        return true;
-    }
-
-
+    private Ball currBall;
     /**
      * Creates new ball body and sprite
      *
@@ -190,10 +237,8 @@ public class GameScreen implements Screen, InputProcessor {
      * @param y y position
      */
     public void createBall(int i, float x, float y) {
-        if (i == 0)
-            poolBalls.add(0, new Ball(i));
-        else
-            poolBalls.add(new Ball(i));
+
+        poolBalls.add(new Ball(i));
         poolBalls.get(i).setCenter(x, y);
         currBall = poolBalls.get(i);
         BodyDef bodyDef = new BodyDef();
@@ -206,10 +251,13 @@ public class GameScreen implements Screen, InputProcessor {
         shape.setRadius(currBall.getWidth() / 2 / PIXELS_TO_METERS);
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 0.3f;
-        fixtureDef.friction = 0.3f;
-        fixtureDef.restitution = 0.5f;
+        fixtureDef.density = 0.2f;
+        fixtureDef.friction = 0.1f;
+        fixtureDef.restitution = 1f;
         ballBodies.get(i).createFixture(fixtureDef);
+        ballBodies.get(i).setLinearDamping(0.75f);
+        ballBodies.get(i).setAngularDamping(1);
+        ballBodies.get(i).setUserData(poolBalls.get(i));
         shape.dispose();
 
     }
@@ -220,11 +268,10 @@ public class GameScreen implements Screen, InputProcessor {
     private void createWallModels() {
         final int pXT = 23 * (screenWidth / 800);
         final int pYT = 23 * (screenHeight / 480);
-        float x = table.getTableInside().getX();
-        float y = table.getTableInside().getY();
+        float x = table.getTableInside().getX() * (screenWidth / 800);
+        float y = table.getTableInside().getY() * (screenHeight / 480);
         float width = table.getTableInside().getWidth() * (screenWidth / 800);
         float height = table.getTableInside().getHeight() * (screenHeight / 480);
-        float lineThickness = 0.1f;
         t = new Rectangle();
         t.setSize(width + 30, height + 30);
         t.setPosition(-(screenWidth / 2 - x) - 15, -(screenHeight / 2 - y) - 15);
@@ -253,8 +300,8 @@ public class GameScreen implements Screen, InputProcessor {
 
         FixtureDef wallFixture = new FixtureDef();
         wallFixture.density = 1;
-        wallFixture.friction = 1;
-        wallFixture.restitution = 0.7f;
+        wallFixture.friction = 1f;
+        wallFixture.restitution = 1.1f;
         wallFixture.shape = wallShape;
 
         BodyDef wallBodyDef = new BodyDef();
@@ -265,59 +312,87 @@ public class GameScreen implements Screen, InputProcessor {
         wallBodyDef.position.set(posX + halfWidth, posY + halfHeight);
 
         Body wall = world.createBody(wallBodyDef);
-//        wall.
         wall.createFixture(wallFixture);
+
+
     }//add wall
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        table.getSlider().setValue(10);
-        if (!table.getSlider().isDragging()) {
-            Vector2 ball = new Vector2(poolBalls.get(0).getX(), poolBalls.get(0).getY());
-            Vector2 line = new Vector2((float) lineX, (float) lineY);
-            float power = ball.dst(line) / (PIXELS_TO_METERS * 100);
-            float angle = MathUtils.radiansToDegrees * MathUtils.atan2(lineY -
-                    (ball.x + cue.getHeight() / 2), line.x -
-                    (ball.y + cue.getHeight() / 2));
-            float y1 = (cue.getHeight() / 2 * line.y) / ball.dst(line);
-            float x1 = (float) Math.sqrt(Math.pow(y1, 2) - Math.pow(cue.getHeight() / 2, 2));
-            System.out.println((float) x1 + "  " + (float) y1);
-            System.out.println("cue center" + (float) poolBalls.get(0).getX() + cue.getHeight() / 2 + " " + (float) poolBalls.get(0).getY() + cue.getHeight() / 2);
-            ballBodies.get(0).applyLinearImpulse(new Vector2(((poolBalls.get(0).getX() - line.x) / 1000), (poolBalls.get(0).getY() - line.y) / 1000), ballBodies.get(0).getPosition(), true);
 
+        Array<Body> bodies = new Array<Body>(world.getBodyCount());
+        world.getBodies(bodies);
+        boolean moving = false;
+        for (Body b : bodies) {
+            if ((b.getLinearVelocity().x != 0) && (b.getLinearVelocity().y != 0))
+                moving = true;
+            System.out.println(b.getLinearVelocity());
         }
-        return false;
-    }
+        if (!moving) {
+            if (numPocketed == temp) {
+                Player tempPlayer = currPlayer;
+                currPlayer = watchPlayer;
+                watchPlayer = tempPlayer;
+                System.out.println("switched");
+                temp = numPocketed;
+            }
+            System.out.println("Select Power");
+            Gdx.input.setInputProcessor(table);
+            aligned = true;
+            shotNum++;
+        }
 
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        System.out.println(screenX + " " + screenY);
-        float x = -(400 - cue.getX());
-        float y = -(240 - cue.getY());
-        float angle = MathUtils.radiansToDegrees * MathUtils.atan2(screenY -
-                (y + cue.getHeight() / 2), screenX -
-                (x + cue.getHeight() / 2));
-        if (angle < 0) {
-            angle += 360;
-        }
-        stick.setRotation(-angle);
-//        if (table.getTableInside().contains(screenX, screenY))
-//            Gdx.input.setInputProcessor(this);
-//        else
-//            Gdx.input.setInputProcessor(table);
         return true;
     }
 
     public boolean pocketed(Ball b) {
 
         if (!t.contains(b.getBoundingRectangle())) {
-            System.out.println("pcketed");
+            System.out.println("pocketed " + b.getNum());
 
+            if (numPocketed == 0) {
+                if (b.getNum() < 8 && b.getNum() != 0) {
+                    System.out.println(currPlayer.getPlayerNumber() + ": Solid");
+                    System.out.println(watchPlayer.getPlayerNumber() + ": Striped");
+                    currPlayer.setType("solid");
+                    watchPlayer.setType("striped");
+                } else if (b.getNum() > 8) {
+                    System.out.println(currPlayer.getPlayerNumber() + ": Striped");
+                    System.out.println(watchPlayer.getPlayerNumber() + ": Solid");
+                    currPlayer.setType("striped");
+                    watchPlayer.setType("solid");
+                }
+
+            } else if (!b.getType().equals(currPlayer.getType())) {
+                System.out.println("fail");
+                Player temp = currPlayer;
+                currPlayer = watchPlayer;
+                watchPlayer = temp;
+            }
+
+            if (b.getNum() == 0) {
+                cuePocket = true;
+                //ballBodies.get(0).setTransform(-(Gdx.graphics.getWidth() / 2 - 537 * (screenWidth / 800)), -(Gdx.graphics.getHeight() / 2 - 197 * (screenHeight / 480)), 0);
+                // poolBalls.get(0).setPosition(-(Gdx.graphics.getWidth() / 2 - 537 * (screenWidth / 800)), -(Gdx.graphics.getHeight() / 2 - 197 * (screenHeight / 480)));
+            }
+            numPocketed++;
+            System.out.println("Current Player " + currPlayer.getPlayerNumber());
             return true;
+
         }
         return false;
     }
 
 
+    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+
+        return true;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        return false;
+    }
     @Override
     public boolean keyDown(int keycode) {
         return false;

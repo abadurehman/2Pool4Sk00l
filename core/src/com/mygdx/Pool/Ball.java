@@ -1,5 +1,6 @@
 package com.mygdx.Pool;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -26,8 +27,7 @@ public class Ball extends Sprite {
         skin = new Skin();
         skin.addRegions(atlas);
         ball = skin.getSprite(numBall + "");
-        ball.setSize(25, 25);
-
+        ball.setSize(25 * (Gdx.graphics.getWidth() / 800), 25 * (Gdx.graphics.getHeight() / 480));
         super.set(ball);
 
     }
@@ -40,6 +40,17 @@ public class Ball extends Sprite {
     public double getDistance(Vector2 vector) {
         return vector.dst(ball.getOriginX(), ball.getOriginY());
 
+    }
+
+    public String getType() {
+        if (numBall < 8)
+            return "solid";
+        else if (numBall > 8)
+            return "striped";
+        else if (numBall == 0)
+            return "cue";
+        else
+            return "8ball";
     }
 
     public double getCenterX() {
