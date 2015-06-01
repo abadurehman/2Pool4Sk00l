@@ -33,39 +33,124 @@ import java.util.Stack;
  */
 public class GameScreen implements Screen, InputProcessor {
 
+    /**
+     * The current game
+     */
     final Pool game;
+    /**
+     * Pixel to meters conversion
+     */
     private final float PIXELS_TO_METERS = 100f;
+    /**
+     * Arraylist of balls
+     */
     private ArrayList<Ball> poolBalls;
+    /**
+     * Arraylist of the bodies
+     */
     private ArrayList<Body> ballBodies;
+    /**
+     * The table
+     */
     private PoolTable table;
+    /**
+     * The world that you're playing in.
+     */
     private World world;
+    /**
+     * Draws a line with a specific width
+     */
     private ShapeRenderer shapeRenderer;
+    /**
+     * Tests the game, and ignores sprites
+     */
     private Box2DDebugRenderer debugRenderer;
+    /**
+     * 4x4 Matrix used to debug
+     */
     private Matrix4 debugMatrix;
+    /**
+     * Your view of the game
+     */
     private OrthographicCamera camera;
+    /**
+     *  The new rectangle
+     */
     private Rectangle t;
-
+    /**
+     * How much to reduce the force from the input
+     */
     private int POWER_REDUCTION = 6000;
-
+    /**
+     * Height of the screen
+     */
     private int screenHeight;
+    /**
+     * Width of the screen
+     */
     private int screenWidth;
+    /**
+     * Cue ball
+     */
     private Ball cue;
+    /**
+     *  X coordinate of the cue ball
+     */
     private float lineX;
+    /**
+     * Y coordinate of the cue ball
+     */
     private float lineY;
+    /**
+     * Boolean if the ball has been shot
+     */
     private boolean shot;
+    /**
+     * If the first ball the cue contacts is the right ball.
+     */
     private boolean firstContact = false;
+    /**
+     * First player
+     */
     Player player1;
+    /**
+     * Second Plyaer (usually the younger sibling)
+     */
     Player player2;
+    /**
+     * Whichever player's turn it is.
+     */
     Player currPlayer;
+    /**
+     * The watching player, who is waiting their turn.
+     */
     Player watchPlayer;
+    /**
+     * Is the cue ball and target ball aligned to a pocket
+     */
     boolean aligned = false;
+    /**
+     * Counter for how many shots have been taken
+     */
     int shotNum = 0;
+    /**
+     * Number of balls scored.
+     */
     int numPocketed = 0;
-
+    /**
+     * Is the cue ball in a pocket
+     */
     boolean cuePocket = false;
-
+    /**
+     * Is true until the first ball is scored by either player
+     * returns false when the "break" period is over
+     */
     boolean brake = true;
 
+    /**
+     * Constructs a game screen
+     * @param gam Current game
+     */
     public GameScreen(final Pool gam) {
 
         game = gam;
@@ -108,7 +193,10 @@ public class GameScreen implements Screen, InputProcessor {
         shapeRenderer = new ShapeRenderer();
     }
 
-
+    /**
+     * Renders the game screen as the game progresses
+     * @param delta
+     */
     public void render(float delta) {
         camera.update();
         debugRenderer.render(world, camera.combined);
@@ -272,6 +360,11 @@ public class GameScreen implements Screen, InputProcessor {
         debugRenderer.render(world, debugMatrix);
     }
 
+    /**
+     * Resizes the screen
+     * @param width width of the screen
+     * @param height height of the screen
+     */
     public void resize(int width, int height) {
         screenHeight = Gdx.graphics.getHeight();
         screenWidth = Gdx.graphics.getWidth();

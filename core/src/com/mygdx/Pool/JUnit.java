@@ -47,4 +47,5 @@ public class JUnit
         Player currPlayer = new Player("striped", )
         game.pocketed(b);
     }
+
 }

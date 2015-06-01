@@ -10,9 +10,22 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 
 public class Pool extends Game {
+	/**
+	 * Batch of sprites
+	 */
 	SpriteBatch batch;
+	/**
+	 * background textures
+	 */
 	Texture background;
+	/**
+	 * font of text
+	 */
     BitmapFont font;
+
+	/**
+	 * Creates the main menu screen
+	 */
 	@Override
 	public void create () {
         batch = new SpriteBatch();
@@ -21,6 +34,9 @@ public class Pool extends Game {
 		this.setScreen(new MainMenuScreen(this));
 	}
 
+	/**
+	 * renders the screen
+	 */
 	@Override
 	public void render () {
 		super.render();

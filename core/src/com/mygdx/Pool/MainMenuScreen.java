@@ -31,16 +31,51 @@ import com.badlogic.gdx.utils.Align;
  * Created by SrinjoyMajumdar on 5/4/15.
  */
 public class MainMenuScreen implements Screen {
+    /**
+     * Your current game
+     */
     final Pool game;
+    /**
+     * Button to quit
+     */
     TextButton quit;
+    /**
+     * Your screen skin that everything else is built on
+     */
     Skin skin;
+    /**
+     * Region of the packed image
+     */
     TextureAtlas atlas;
+    /**
+     * The current stage
+     */
     Stage stage;
+    /**
+     * Your view of the game
+     */
     OrthographicCamera camera;
+    /**
+     * Background textures
+     */
     Texture background;
+    /**
+     * Font of the text
+     */
     BitmapFont font12;
+    /**
+     * The table
+     */
     PoolTable poolTable;
+    /**
+     * Second font
+     */
     BitmapFont font;
+
+    /**
+     * Constructs the Main Menu Screen
+     * @param gam Current Game
+     */
     public MainMenuScreen(final Pool gam) {
         game = gam;
         poolTable = new PoolTable();
@@ -81,7 +116,10 @@ public class MainMenuScreen implements Screen {
 
     }
 
-
+    /**
+     * Renders the Main Menu Screen
+     * @param delta
+     */
     public void render(float delta) {
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 0.1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -103,6 +141,12 @@ public class MainMenuScreen implements Screen {
 
     }
 
+    /**
+     * Creates the 3 buttons on the Main Menu
+     * @param text What's written in the button
+     * @param color The button color
+     * @return a Button
+     */
     public Button createButton(String text, Color color) {
         Button.ButtonStyle style = new Button.ButtonStyle();
         style.up = skin.getDrawable(text);
