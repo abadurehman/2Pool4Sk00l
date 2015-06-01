@@ -25,45 +25,140 @@ import java.util.ArrayList;
  * Created by SrinjoyMajumdar on 5/5/15.
  */
 public class GameScreen implements Screen, InputProcessor {
-
+    /**
+     * The current game
+     */
     final Pool game;
+    /**
+     * Pixel to meters conversion
+     */
     private final float PIXELS_TO_METERS = 100f;
+    /**
+     * Arraylist of balls
+     */
     public ArrayList<Ball> poolBalls;
+    /**
+     * Arraylist of the bodies
+     */
     public ArrayList<Body> ballBodies;
+    /**
+     * The table
+     */
     public PoolTable table;
+    /**
+     * The world that you're playing in
+     */
     private World world;
+    /**
+     * Draws a line with a specific width
+     */
     private ShapeRenderer shapeRenderer;
+    /**
+     * Tests the game, and ignores sprites
+     */
     private Box2DDebugRenderer debugRenderer;
+    /**
+     * 4x4 Matrix used to debug
+     */
     private Matrix4 debugMatrix;
+    /**
+     * Your View of the game
+     */
     private OrthographicCamera camera;
+    /**
+     * New rectangle
+     */
     private Rectangle t;
-
+    /**
+     * Force reduction from input
+     */
     int POWER_REDUCTION = 6000;
-
+    /**
+     * Height of the screen
+     */
     private int screenHeight;
+    /**
+     * Width of the screen
+     */
     private int screenWidth;
+    /**
+     * cue ball
+     */
     Ball cue;
+    /**
+     * X coordinate of the cue ball
+     */
     private float lineX;
+    /**
+     * Y coordinate of the cue ball
+     */
     private float lineY;
+    /**
+     * Has the shot been taken
+     */
     private boolean shot;
+    /**
+     * If the cue ball contacts the right ball (solid vs stripe)
+     */
     private boolean firstContact = false;
+    /**
+     * Is there AI?
+     */
     boolean AI = false;
+    /**
+     * First player
+     */
     Player player1;
+    /**
+     * Second Plyaer (usually the younger sibling)
+     */
     Player player2;
+    /**
+     * Whichever player's turn it is.
+     */
     Player currPlayer;
+    /**
+     * The watching player, who is waiting their turn.
+     */
     Player watchPlayer;
+    /**
+     * Is the cue ball and target ball aligned to a pocket
+     */
     boolean aligned = false;
+    /**
+     * Counter for how many shots have been taken
+     */
     int shotNum = 0;
+    /**
+     * Number of balls scored.
+     */
     int numPocketed = 0;
-
+    /**
+     * Is the cue ball in a pocket
+     */
     boolean cuePocket = false;
-
+    /**
+     * Is true until the first ball is scored by either player
+     * returns false when the "break" period is over
+     */
     boolean brake = true;
 
+    /**
+     * Trajectory
+     */
     Vector2 line;
+    /**
+     * Position of the ball
+     */
     Vector2 position;
+    /**
+     * Power applied
+     */
     Vector2 power;
-
+    /**
+     * Constructs a game screen
+     * @param gam Current game
+     */
     public GameScreen(final Pool gam) {
 
         game = gam;
@@ -106,7 +201,10 @@ public class GameScreen implements Screen, InputProcessor {
         shapeRenderer = new ShapeRenderer();
     }
 
-
+    /**
+     * Renders the game screen as the game progresses
+     * @param delta
+     */
     public void render(float delta) {
         camera.update();
         debugRenderer.render(world, camera.combined);
@@ -369,9 +467,16 @@ public class GameScreen implements Screen, InputProcessor {
 
 
     }//add wall
-
-
     int tempNum = 0;
+
+    /**
+     *
+     * @param screenX
+     * @param screenY
+     * @param pointer
+     * @param button
+     * @return
+     */
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
 //            System.out.println("Select Power");
@@ -388,6 +493,11 @@ public class GameScreen implements Screen, InputProcessor {
         return true;
     }
 
+    /**
+     * Pockets the ball
+     * @param b Ball to be pocketed
+     * @return has the ball been pocketed
+     */
     public boolean pocketed(Ball b) {
 
         if (!t.contains(b.getBoundingRectangle())) {
@@ -434,6 +544,10 @@ public class GameScreen implements Screen, InputProcessor {
         return false;
     }
 
+    /**
+     * Is the board still active
+     * @return if the board is still active
+     */
     public boolean moving() {
         Array<Body> bodies = new Array<Body>(world.getBodyCount());
         world.getBodies(bodies);
@@ -444,33 +558,63 @@ public class GameScreen implements Screen, InputProcessor {
         return false;
     }
 
-
+    /**
+     * Has the user tapped the screen yet
+     * @param screenX X coord of tap
+     * @param screenY Y coord of tap
+     * @param pointer THe Point
+     * @param button the button
+     * @return is there a tap
+     */
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
         return true;
     }
 
+    /**
+     * Has the up button been pressed
+     * @param keycode
+     * @return Has the up button been pressed
+     */
     @Override
     public boolean keyUp(int keycode) {
         return false;
     }
+    /**
+     * Has the up button been pressed
+     * @param keycode
+     * @return Has the up button been pressed
+     */
     @Override
     public boolean keyDown(int keycode) {
         return false;
     }
-
+    /**
+     * Has the up button been pressed
+     * @param keycode
+     * @return Has the up button been pressed
+     */
     @Override
     public boolean keyTyped(char character) {
         return false;
     }
 
-
+    /**
+     * Has the screen been drageed
+     * @param keycode
+     * @return dragged or not
+     */
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
 
         return false;
     }
 
+
+    //Not used//
+    //Not used//
+    //Not used//
+    //Not used//
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         return false;

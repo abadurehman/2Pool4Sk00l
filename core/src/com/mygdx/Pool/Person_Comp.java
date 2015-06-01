@@ -15,40 +15,114 @@ import java.util.ArrayList;
  * Created by SrinjoyMajumdar on 5/4/15.
  */
 public class Person_Comp extends GameScreen {
-
+    /**
+     * Pixel to meters converstion
+     */
     private final float PIXELS_TO_METERS = 100f;
+    /**
+     * Arraylist of pool balls objects
+     */
     private ArrayList<Ball> poolBalls;
+    /**
+     * Arraylist of ball bodies
+     */
     private ArrayList<Body> ballBodies;
+    /**
+     * Table
+     */
     private PoolTable table;
+    /**
+     * World of existence
+     */
     private World world;
+    /**
+     * Draws a line with a specific width
+     */
     private ShapeRenderer shapeRenderer;
+    /**
+     * Tests the game, and ignores sprites
+     */
     private Box2DDebugRenderer debugRenderer;
+    /**
+     * 4x4 Matrix used to debug
+     */
     private Matrix4 debugMatrix;
+    /**
+     * Your View of the game
+     */
     private OrthographicCamera camera;
+    /**
+     * New rectangle
+     */
     private Rectangle t;
-
+    /**
+     * Power reduction from input
+     */
     private int POWER_REDUCTION = 6000;
 
     private int screenHeight;
+    /**
+     * Width of the screen
+     */
     private int screenWidth;
-    private Ball cue;
+    /**
+     * cue ball
+     */
+    Ball cue;
+    /**
+     * X coordinate of the cue ball
+     */
     private float lineX;
+    /**
+     * Y coordinate of the cue ball
+     */
     private float lineY;
+    /**
+     * Has the shot been taken
+     */
     private boolean shot;
+    /**
+     * If the cue ball contacts the right ball (solid vs stripe)
+     */
     private boolean firstContact = false;
 
+    /**
+     * Whichever player's turn it is.
+     */
     Player currPlayer;
+    /**
+     * The watching player, who is waiting their turn.
+     */
     Player watchPlayer;
+    /**
+     * Are the balls aligned to a pocket
+     */
     boolean aligned = false;
+    /**
+     * Counter for how many shots have been taken
+     */
     int shotNum = 0;
+    /**
+     * Number of balls scored.
+     */
     int numPocketed = 0;
-
+    /**
+     * Is the cue ball in a pocket
+     */
     boolean cuePocket = false;
-
+    /**
+     * Is true until the first ball is scored by either player
+     * returns false when the "break" period is over
+     */
     boolean brake = true;
 
-
+    /**
+     * New player (user)
+     */
     private Player player1 = new Player("p1", 1);
+    /**
+     * New computer player
+     */
     private Player AI = new Player("p2", 2);
     public Person_Comp(final Pool gam) {
 
@@ -56,6 +130,10 @@ public class Person_Comp extends GameScreen {
         super(gam);
     }
 
+    /**
+     * Renders the game
+     * @param delta
+     */
     public void render(float delta) {
         cue = super.cue;
         poolBalls = super.poolBalls;

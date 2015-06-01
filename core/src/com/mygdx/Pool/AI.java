@@ -9,10 +9,23 @@ import java.util.ArrayList;
  * Created by Owen Li on 5/11/2015.
  */
 public class AI {
+    /**
+     * Minimum distance to a ball
+     */
     double minDist = 0;
+    /**
+     * The trajectory to the targeted ball
+     */
     Vector2 targetDirection;
+    /**
+     * Angle offset from the target ball
+     */
     double angleOff = 0;
+    /**
+     * The closest ball to you
+     */
     Ball closestBall;
+
 
     /**
      * @param balls  the set of all the balls in the game
@@ -65,7 +78,12 @@ public class AI {
         return targetCueCenter;
     }
 
-
+    /**
+     * Making sure that the targeted ball is your type of ball (solid/stripe)
+     * @param type String solid/stripe
+     * @param ballNum To make sure it's not the cue ball
+     * @return if the targeted ball is safe to hit.
+     */
     public boolean isMyBall(ArrayList<Ball> balls, String type, int ballNum) {
         if (ballNum == 0) {
             return false;
@@ -93,6 +111,14 @@ public class AI {
 
         return false;
     }
+    /**
+     * Calculates the needed trajectory to hit the targeted ball
+     * @param targetDisX x-distance to the targeted ball
+     * @param targetDisY y-distance to the targeted ball
+     * @param leftOverSpeed The speed after collision
+     * @param FRICTION Friction constant acting on the balls
+     * @return Vector2 that'll make the ball in the pocket
+     */
 
     public Vector2 neededTrajectory(double targetDisX, double targetDisY, double leftOverSpeed, double FRICTION) {
         double distance = (targetDisX * targetDisX) + (targetDisY * targetDisY);
@@ -110,7 +136,13 @@ public class AI {
 
         return new Vector2((float) (ratio * targetDisX), (float) (ratio * targetDisY / energyTransfer));
     }
-
+    /**
+     * Sees which pocket the balls are aligned towards
+     * @param closestBall Closest to cue ball
+     * @param balls arraylist of all the balls still on the table
+     * @param gameTable
+     * @return Vector with the desired trajectory
+     */
     public Vector2 evaluatePockets(Ball closestBall, ArrayList<Ball> balls, PoolTable gameTable) {
         Ball cueBall = balls.get(0);
         Vector2 closestPocket = gameTable.getPocketIndex(0);
@@ -131,7 +163,13 @@ public class AI {
         }
         return closestPocket;
     }
-
+    /**
+     * Checks if the balls are lined up to a pocket
+     * @param cueVar Cue ball
+     * @param ballVar target ball
+     * @param pocketVar pocket
+     * @return if the balls are lined up or not
+     */
     public boolean isLinedUp(double cueVar, double ballVar, double pocketVar) {
         if (cueVar < ballVar && ballVar < pocketVar) {
             return true;
