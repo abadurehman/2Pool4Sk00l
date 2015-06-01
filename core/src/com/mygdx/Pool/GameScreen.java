@@ -326,7 +326,11 @@ public class GameScreen implements Screen, InputProcessor {
         debugRenderer.render(world, debugMatrix);
     }
 
-
+    /**
+     * Updates the position of the ball through eacy render
+     * @param b Ball
+     * @param i Ball number
+     */
     public void updatePosition(Ball b, int i) {
         if (!(cuePocket && b.getNum() == 0)) {
             b.setPosition((ballBodies.get(i).getPosition().x) * PIXELS_TO_METERS -
@@ -347,11 +351,22 @@ public class GameScreen implements Screen, InputProcessor {
         }
     }
 
+    /**
+     * Resizes the screen for different screen sizes
+     * @param width
+     * @param height
+     */
     public void resize(int width, int height) {
         screenHeight = Gdx.graphics.getHeight();
         screenWidth = Gdx.graphics.getWidth();
     }
 
+    /**
+     * If the first ball the cue ball hits is not the right type of ball, then
+     * @param a Ball a
+     * @param b Ball b
+     * @return true if the cue ball hits the wrong ball
+     */
     public static boolean checkSwitchFirstContact(Ball a, Ball b) {
 
 
@@ -385,7 +400,11 @@ public class GameScreen implements Screen, InputProcessor {
 
     }
 
-
+    /**
+     * Highlights the avatar of the current player
+     * @param currPlayer
+     * @return int
+     */
     public int drawUserBox(Player currPlayer) {
 
         int x;
@@ -569,6 +588,9 @@ public class GameScreen implements Screen, InputProcessor {
         return false;
     }
 
+    /**
+     * Switches the current player and spectating player
+     */
     public static void switchPlayers() {
         Player temp = currPlayer;
         currPlayer = watchPlayer;
@@ -576,6 +598,10 @@ public class GameScreen implements Screen, InputProcessor {
         numSwitched++;
     }
 
+    /**
+     * Racks up the balls to formation
+     * @return true if no shots have been taken and the balls need to be racked up
+     */
     public boolean drawRack() {
         float x = -156 * (screenWidth / 800);
         float y = -43 * (screenHeight / 480);
