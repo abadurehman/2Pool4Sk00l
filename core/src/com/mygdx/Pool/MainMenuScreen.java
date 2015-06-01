@@ -24,6 +24,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 
 
 /**
@@ -38,11 +39,11 @@ public class MainMenuScreen implements Screen {
     OrthographicCamera camera;
     Texture background;
     BitmapFont font12;
-
+    PoolTable poolTable;
     BitmapFont font;
     public MainMenuScreen(final Pool gam) {
         game = gam;
-
+        poolTable = new PoolTable();
         stage = new Stage();
         Gdx.input.setInputProcessor(stage);
         camera = new OrthographicCamera();
@@ -57,17 +58,20 @@ public class MainMenuScreen implements Screen {
         atlas = new TextureAtlas("buttonpack2.txt");
         skin = new Skin();
         skin.addRegions(atlas);
-
+        float buttonScale = 0.7f;
         Table table = new Table();
+        table.setDebug(true);
         table.setFillParent(true);
-        table.add();
-        table.row();
         table.setBackground(new TextureRegionDrawable(new TextureRegion(background)));
-        table.add(createButton(("play"), Color.GREEN)).padRight(75).padTop(25);
+        table.add();
+        table.row().width(Gdx.graphics.getWidth() / 3);
+
+
+        table.add(createButton("play", Color.BLACK)).height(Gdx.graphics.getWidth() / 3);
 //        table.row();
-        table.add(createButton(("multi"), Color.GREEN)).padRight(75).padTop(25);// Row 0, column 1.
+        table.add(createButton(("multi"), Color.GREEN)).height(Gdx.graphics.getWidth() / 3);// Row 0, column 1.
 //        table.row();
-        table.add(createButton(("settings"), Color.GREEN)).padTop(25);
+        table.add(createButton(("settings"), Color.GREEN)).height(Gdx.graphics.getWidth() / 3);
 
         stage.addActor(table);
     }
@@ -105,7 +109,8 @@ public class MainMenuScreen implements Screen {
         style.down = skin.getDrawable(text);
 
         Button button = new Button(style);
-        button.setSize(10, 10);
+//        button.s(1000,1000);
+        button.pad(50);
         button.addListener(new InputListener() {
             public boolean touchDown(InputEvent event, float x, float y,
                                      int pointer, int button) {

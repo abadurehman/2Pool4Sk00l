@@ -40,4 +40,6 @@ public class Player {
     public String getType() {
         return type;
     }
+
+    public int get
 }

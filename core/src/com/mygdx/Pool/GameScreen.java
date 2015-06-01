@@ -5,6 +5,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Rectangle;
@@ -18,7 +19,10 @@ import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Slider;
 import com.badlogic.gdx.utils.Array;
+
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -49,6 +53,7 @@ public class GameScreen implements Screen, InputProcessor {
     private float lineX;
     private float lineY;
     private boolean shot;
+    private boolean firstContact = false;
     Player player1;
     Player player2;
     Player currPlayer;
@@ -56,22 +61,26 @@ public class GameScreen implements Screen, InputProcessor {
     boolean aligned = false;
     int shotNum = 0;
     int numPocketed = 0;
-    int temp = 0;
+
     boolean cuePocket = false;
+
+    boolean brake = true;
+
     public GameScreen(final Pool gam) {
 
         game = gam;
-        screenHeight = Gdx.graphics.getHeight();
-        screenWidth = Gdx.graphics.getWidth();
+        screenHeight = 540;
+        screenWidth = 960;
         world = new World(new Vector2(0, 0), true); //create world for physics
         table = new PoolTable();
         Gdx.input.setInputProcessor(this);
-        camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.
-                getHeight());
+        camera = new OrthographicCamera(960, 540);
 
         poolBalls = new ArrayList<Ball>(16);
         ballBodies = new ArrayList<Body>(16);
-        createBall(0, -(Gdx.graphics.getWidth() / 2 - 537 * (screenWidth / 800)), -(Gdx.graphics.getHeight() / 2 - 197 * (screenHeight / 480)));
+        float cueX = 164;
+        float cueY = -45;
+        createBall(0, cueX, cueY);
         lineX = poolBalls.get(0).getX();
         lineY = poolBalls.get(0).getY();
         cue = poolBalls.get(0);
@@ -113,6 +122,10 @@ public class GameScreen implements Screen, InputProcessor {
         table.draw();
         game.batch.end();
 
+        if (!moving())
+            shapeRenderer.setColor(0, 1, 0, 0);
+        else
+            shapeRenderer.setColor(1, 0, 0, 0);
 
         game.batch.setProjectionMatrix(camera.combined);
         debugMatrix = game.batch.getProjectionMatrix().cpy().scale(PIXELS_TO_METERS,
@@ -122,9 +135,12 @@ public class GameScreen implements Screen, InputProcessor {
 
         for (int i = poolBalls.size() - 1; i > -1; i--) {
             Ball b = poolBalls.get(i);
-            b.setPosition((ballBodies.get(i).getPosition().x) * PIXELS_TO_METERS -
-                    poolBalls.get(i).getHeight() / 2, (ballBodies.get(i).getPosition().y) * PIXELS_TO_METERS
-                    - b.getHeight() / 2);
+            if (!(cuePocket && b.getNum() == 0)) {
+                b.setPosition((ballBodies.get(i).getPosition().x) * PIXELS_TO_METERS -
+                        poolBalls.get(i).getHeight() / 2, (ballBodies.get(i).getPosition().y) * PIXELS_TO_METERS
+                        - b.getHeight() / 2);
+            }
+
             b.draw(game.batch);
             if (pocketed(b)) {
                 if (b.getNum() == 0) {
@@ -141,8 +157,6 @@ public class GameScreen implements Screen, InputProcessor {
         int xp2 = 200;
 
         for (Ball b : player1.getScoredBalls()) {
-
-
             b.setCenterX(xp1);
             b.setCenterY(185);
             b.draw(game.batch);
@@ -160,17 +174,31 @@ public class GameScreen implements Screen, InputProcessor {
         if (Gdx.input.isTouched() && !table.getSlider().isDragging()) {
 
             Vector2 touchPos = new Vector2();
-            touchPos.set(-(screenWidth / 2 - Gdx.input.getX()), (screenHeight / 2 - Gdx.input.getY()));
+            touchPos.set(((Gdx.input.getX() - screenWidth / 2) * (camera.viewportWidth / screenWidth)), -(Gdx.input.getY() - screenHeight / 2) * (camera.viewportHeight / screenHeight));
             System.out.println(touchPos);
             lineX = touchPos.x;
             lineY = touchPos.y;
+            if (!cuePocket) {
+                shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+                shapeRenderer.line((float) poolBalls.get(0).getX() + poolBalls.get(0).getWidth() / 2, (float) poolBalls.get(0).getY() + poolBalls.get(0).getHeight() / 2, (float) lineX, (float) lineY);
+                shapeRenderer.end();
+            } else {
+                poolBalls.get(0).setCenterX(lineX);
+                poolBalls.get(0).setCenterY(lineY);
+            }
+
+
+
+        }
+        if (currPlayer != null) {
+            int x;
             shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-            shapeRenderer.setColor(1, 1, 0, 1);
-
-            shapeRenderer.line((float) poolBalls.get(0).getX() + poolBalls.get(0).getWidth() / 2, (float) poolBalls.get(0).getY() + poolBalls.get(0).getHeight() / 2, (float) lineX, (float) lineY);
+            if (currPlayer.getPlayerNumber() == 1)
+                x = -355;
+            else
+                x = 269;
+            shapeRenderer.box(x, 175, 0, 70, 70, 0);
             shapeRenderer.end();
-
-
         }
         if (aligned && table.getSlider().getValue() != 1 && !table.getSlider().isDragging()) {
             System.out.println("shot");
@@ -180,44 +208,66 @@ public class GameScreen implements Screen, InputProcessor {
             temp = POWER_REDUCTION;
             POWER_REDUCTION *= val;
 
+            AI ai = new AI();
+            Vector2 targetCenter = ai.choice(poolBalls, currPlayer, table);
+
             Vector2 line = new Vector2(lineX - cue.getHeight() / 2, lineY - cue.getHeight() / 2);
             Vector2 power = new Vector2(-(poolBalls.get(0).getX() - line.x) / POWER_REDUCTION,
                     -(poolBalls.get(0).getY() - line.y) / POWER_REDUCTION);
             Vector2 position = new Vector2(ballBodies.get(0).getPosition().x + cue.getWidth() / 2,
                     ballBodies.get(0).getPosition().y + cue.getWidth() / 2);
+
+
             ballBodies.get(0).applyLinearImpulse(power, position, true);
+            ballBodies.get(0).setAngularVelocity(0);
             Gdx.input.setInputProcessor(this);
             aligned = false;
             shot = true;
+            firstContact = false;
             POWER_REDUCTION = temp;
         }
-        if (shot) {
+        if (shot && !firstContact) {
             for (Contact c : world.getContactList()) {
                 if (c.isTouching()) {
                     Ball a = (Ball) c.getFixtureA().getBody().getUserData();
                     Ball b = (Ball) c.getFixtureB().getBody().getUserData();
                     if (a != null && b != null && currPlayer.getType() != null) {
                         if (a.getNum() == 0) {
-                            if (b.getNum() < 8 && currPlayer.getType().equals("striped") || b.getNum() > 8 && currPlayer.getType().equals("solid")) {
+                            if ((b.getNum() < 8 && currPlayer.getType().equals("striped") || (b.getNum() > 8 && currPlayer.getType().equals("solid")))) {
                                 Player temp = currPlayer;
                                 currPlayer = watchPlayer;
                                 watchPlayer = temp;
-                                System.out.println("switched");
-                                shot = false;
+                                System.out.println("switched because wrong contact");
+                                System.out.println("Current Player" + currPlayer.getPlayerNumber());
+                                firstContact = true;
                             }
 
                         } else if (b.getNum() == 0) {
-                            if (a.getNum() < 8 && currPlayer.getType().equals("striped") || a.getNum() > 8 && currPlayer.getType().equals("solid")) {
+                            if ((a.getNum() < 8 && currPlayer.getType().equals("striped") || (a.getNum() > 8 && currPlayer.getType().equals("solid")))) {
                                 Player temp = currPlayer;
                                 currPlayer = watchPlayer;
                                 watchPlayer = temp;
-                                System.out.println("switched");
-                                shot = false;
+                                System.out.println("switched because wrong contact");
+                                System.out.println("Current Player" + currPlayer.getPlayerNumber());
+                                firstContact = true;
                             }
                         }
                     }
                 }
             }
+        }
+        if (shot && !moving() && shotNum != 0) {
+            if (!firstContact) {
+                if (numPocketed == tempNum) {
+                    Player temp = currPlayer;
+                    currPlayer = watchPlayer;
+                    watchPlayer = temp;
+                    System.out.println("switched because nothing pocketed");
+                    System.out.println("Current Player" + currPlayer.getPlayerNumber());
+                }
+            }
+            shot = false;
+            tempNum = numPocketed;
         }
         debugRenderer.render(world, debugMatrix);
     }
@@ -236,7 +286,7 @@ public class GameScreen implements Screen, InputProcessor {
      * @param x x position
      * @param y y position
      */
-    public void createBall(int i, float x, float y) {
+    public Body createBall(int i, float x, float y) {
 
         poolBalls.add(new Ball(i));
         poolBalls.get(i).setCenter(x, y);
@@ -259,6 +309,7 @@ public class GameScreen implements Screen, InputProcessor {
         ballBodies.get(i).setAngularDamping(1);
         ballBodies.get(i).setUserData(poolBalls.get(i));
         shape.dispose();
+        return ballBodies.get(i);
 
     }
 
@@ -272,9 +323,11 @@ public class GameScreen implements Screen, InputProcessor {
         float y = table.getTableInside().getY() * (screenHeight / 480);
         float width = table.getTableInside().getWidth() * (screenWidth / 800);
         float height = table.getTableInside().getHeight() * (screenHeight / 480);
+        System.out.println("Wall height " + height);
         t = new Rectangle();
         t.setSize(width + 30, height + 30);
         t.setPosition(-(screenWidth / 2 - x) - 15, -(screenHeight / 2 - y) - 15);
+
         addWall(-(screenWidth / 2 - x) + pXT, -(screenHeight / 2 - y), width / 2 - 2 * pXT, 0.1f);//bottomleft
         addWall(-(screenWidth / 2 - x) + pXT + width / 2, -(screenHeight / 2 - y), width / 2 - 2 * pXT, 0.1f);//bottomright
         addWall(-(screenWidth / 2 - x) + pXT, -(screenHeight / 2 - y) + height, width / 2 - 2 * pXT, 0.1f);//topleft
@@ -301,7 +354,7 @@ public class GameScreen implements Screen, InputProcessor {
         FixtureDef wallFixture = new FixtureDef();
         wallFixture.density = 1;
         wallFixture.friction = 1f;
-        wallFixture.restitution = 1.1f;
+        wallFixture.restitution = 1f;
         wallFixture.shape = wallShape;
 
         BodyDef wallBodyDef = new BodyDef();
@@ -317,31 +370,21 @@ public class GameScreen implements Screen, InputProcessor {
 
     }//add wall
 
+
+    int tempNum = 0;
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-
-        Array<Body> bodies = new Array<Body>(world.getBodyCount());
-        world.getBodies(bodies);
-        boolean moving = false;
-        for (Body b : bodies) {
-            if ((b.getLinearVelocity().x != 0) && (b.getLinearVelocity().y != 0))
-                moving = true;
-            System.out.println(b.getLinearVelocity());
-        }
-        if (!moving) {
-            if (numPocketed == temp) {
-                Player tempPlayer = currPlayer;
-                currPlayer = watchPlayer;
-                watchPlayer = tempPlayer;
-                System.out.println("switched");
-                temp = numPocketed;
-            }
             System.out.println("Select Power");
+        if (!moving()) {
             Gdx.input.setInputProcessor(table);
             aligned = true;
             shotNum++;
         }
-
+        if (cuePocket) {
+            world.destroyBody(ballBodies.get(0));
+            ballBodies.set(0, createBall(0, poolBalls.get(0).getX(), poolBalls.get(0).getY()));
+            cuePocket = false;
+        }
         return true;
     }
 
@@ -350,21 +393,29 @@ public class GameScreen implements Screen, InputProcessor {
         if (!t.contains(b.getBoundingRectangle())) {
             System.out.println("pocketed " + b.getNum());
 
+
+            if (b.getNum() == 8) {
+                System.out.println("done");
+                Gdx.app.exit();
+            }
             if (numPocketed == 0) {
                 if (b.getNum() < 8 && b.getNum() != 0) {
                     System.out.println(currPlayer.getPlayerNumber() + ": Solid");
                     System.out.println(watchPlayer.getPlayerNumber() + ": Striped");
                     currPlayer.setType("solid");
                     watchPlayer.setType("striped");
+                    brake = false;
+
                 } else if (b.getNum() > 8) {
                     System.out.println(currPlayer.getPlayerNumber() + ": Striped");
                     System.out.println(watchPlayer.getPlayerNumber() + ": Solid");
                     currPlayer.setType("striped");
                     watchPlayer.setType("solid");
+                    brake = false;
                 }
 
-            } else if (!b.getType().equals(currPlayer.getType())) {
-                System.out.println("fail");
+            } else if (!b.getType().equals(currPlayer.getType()) && !brake) {
+                System.out.println("switched because wrong ball pocketed");
                 Player temp = currPlayer;
                 currPlayer = watchPlayer;
                 watchPlayer = temp;
@@ -379,6 +430,16 @@ public class GameScreen implements Screen, InputProcessor {
             System.out.println("Current Player " + currPlayer.getPlayerNumber());
             return true;
 
+        }
+        return false;
+    }
+
+    public boolean moving() {
+        Array<Body> bodies = new Array<Body>(world.getBodyCount());
+        world.getBodies(bodies);
+        for (Body b : bodies) {
+            if ((b.getLinearVelocity().x != 0) && (b.getLinearVelocity().y != 0))
+                return true;
         }
         return false;
     }

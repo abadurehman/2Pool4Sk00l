@@ -27,7 +27,7 @@ public class Ball extends Sprite {
         skin = new Skin();
         skin.addRegions(atlas);
         ball = skin.getSprite(numBall + "");
-        ball.setSize(25 * (Gdx.graphics.getWidth() / 800), 25 * (Gdx.graphics.getHeight() / 480));
+        ball.setSize(25, 25);
         super.set(ball);
 
     }
