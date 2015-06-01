@@ -5,6 +5,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.mygdx.Pool.Ball;
 import com.mygdx.Pool.PoolTable;
 
+import java.util.ArrayList;
+
 
 /**
  * Created by Owen Li on 5/11/2015.
@@ -21,22 +23,22 @@ public class AI {
      * @param tab    the table within which all this is occuring Return Vector2
      *               direction cue ball goes
      */
-    public Vector2 choice(Ball[] balls, int player, PoolTable tab, double FRICTION, double energyTransfer) {
+    public Vector2 choice(ArrayList<Ball> balls, Player stryker, PoolTable tab) {
 
-        Ball cueBall = balls[0];
+        Ball cueBall = balls.get(0);
         PoolTable gameTable = tab;
 
         closestBall = null; // what ball to start with?
-        if (player == 0) {
-            closestBall = balls[1];
+        if (stryker.getType().equals("solid")) {
+            closestBall = balls.get(1);
         } else {
-            closestBall = balls[15];
+            closestBall = balls.get(15);
         }
 
         double minDist = cueBall.getDistance(closestBall);
         for (Ball i : balls) // finds which ball is closest
         {
-            if (isMyBall(player, i.getNum())) {
+            if (isMyBall(stryker.getType(), i.getNum())) {
                 if (cueBall.getDistance(i) < minDist) {
                     minDist = cueBall.getDistance(i);
                     closestBall = i;
@@ -55,24 +57,17 @@ public class AI {
 
         Vector2 targetCueCenter = new Vector2((float) (closestBall.getX() - (2 * ratio * targetDirection.x)), (float) (closestBall.getY() - (2 * ratio * targetDirection.y)));
 
-        Vector2 targetDisplacement = new Vector2(targetCueCenter.x - cueBall.getX(), targetCueCenter.y - cueBall.getY());
-        // how much we want the ball to change in X and Y according to center
-
-        Vector2 neededSpeedTransfer;
-        Vector2 calculatedStrike = neededTrajectory(targetDisplacement.x, targetDisplacement.y, 0, 0.5);
-
-
-        return calculatedStrike;
+        return targetCueCenter;
     }
 
 
-    public boolean isMyBall(int player, int ballNum) {
+    public boolean isMyBall(String type, int ballNum) {
         if (ballNum == 0) {
             return false;
         }
-        if (player == 0 && ballNum < 8) {
+        if (type.equals("solid") && ballNum < 8) {
             return true;
-        } else if (player == 1 && ballNum > 8) {
+        } else if (type.equals("striped") && ballNum > 8) {
             return true;
         }
         return false;
@@ -95,8 +90,8 @@ public class AI {
         return new Vector2((float) (ratio * targetDisX), (float) (ratio * targetDisY / energyTransfer));
     }
 
-    public Vector2 evaluatePockets(Ball closestBall, Ball[] balls, PoolTable gameTable) {
-        Ball cueBall = balls[0];
+    public Vector2 evaluatePockets(Ball closestBall, ArrayList<Ball> balls, PoolTable gameTable) {
+        Ball cueBall = balls.get(0);
         Vector2 closestPocket = gameTable.getPocketIndex(0);
         minDist = closestBall.getDistance(closestPocket);
         Vector2 positions[] = gameTable.getPockets();
