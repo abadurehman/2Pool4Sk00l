@@ -143,6 +143,13 @@ public class AI {
         return closestPocket;
     }
 
+    /**
+     * Checks if the balls are lined up to a pocket
+     * @param cueVar Cue ball
+     * @param ballVar target ball
+     * @param pocketVar pocket
+     * @return if the balls are lined up or not
+     */
     public boolean isLinedUp(double cueVar, double ballVar, double pocketVar) {
         if (cueVar < ballVar && ballVar < pocketVar) {
             return true;
