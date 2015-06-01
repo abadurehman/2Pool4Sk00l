@@ -1,31 +1,50 @@
 package com.mygdx.Pool;
 
 /**
- * Created by Xerxes II on 5/27/2015.
+ * Created by Owen Li on 5/27/2015.
  */
-public class JUnit {
-    public void GameScreenConstructor()
-    {
-        GameScreen game = new GameScreen(gam);
-        String toStr = game.toString();
-
-    }
+public class JUnit
+{
+    final Pool gam;
     public void GameScreenRender()
     {
         GameScreen game = new GameScreen(gam);
-        String toStr = game.toString();
+        int i = 3;
+        Ball b = new Ball(i);
+        double length = game.poolBalls.getLength();
+        game.pocketed(b);
+        assertEquals("Ball should be removed from Array", length-1 , (double)game.poolBalls.getLength());
     }
-    public void MainMenuConstructor()
+    public void WrongBallFirstContactSwitch()
     {
-        MainMenuScreen menu = new MainMenuScreen(gam);
-        String toStr = menu.toString();
+
+       //        if ((b.getNum() < 8 && currPlayer.getType().equals("striped") || (b.getNum() > 8 && currPlayer.getType().equals("solid")))) {
+//            Player temp = currPlayer;
+//            currPlayer = watchPlayer;
+//            watchPlayer = temp;
+//            System.out.println("switched because wrong contact");
+//            System.out.println("Current Player" + currPlayer.getPlayerNumber());
+//            firstContact = true;
+//        }
+        Ball b = new Ball(3);
+        GameScreen game = new GameScreen(gam);
+        Player currPlayer = new Player("striped", 8);
+        boolean firstContact = true;
+        if (b.getNum() < 8 && currPlayer.getType().equals("striped"))
+        {
+            assertTrue(firstContact);
+        }
+        if (b.getNum()>8 && currPlayer.getType().equals("solid"))
+        {
+            assertFalse(firstContact);
+        }
     }
-    int height = 5;
-    int width =  7;
-    public void MainMenuResize()
-    {
-        MainMenuScreen menu = new MainMenuScreen(gam);
-        String toStr = menu.toString();
+    public void WrongBallPocketed() {
+        GameScreen game = new GameScreen(gam);
+        int ball = 3;
+        Ball b = new Ball(ball);
+        double length = game.poolBalls.getLength();
+        Player currPlayer = new Player("striped", )
+        game.pocketed(b);
     }
-    public void
 }
