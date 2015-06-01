@@ -7,14 +7,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.NinePatch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -22,9 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.utils.NinePatchDrawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.badlogic.gdx.utils.Align;
 
 
 /**
@@ -73,6 +66,11 @@ public class MainMenuScreen implements Screen {
     BitmapFont font;
 
     /**
+     * Table to which buttons are added
+     */
+    Table table;
+
+    /**
      * Constructs the Main Menu Screen
      * @param gam Current Game
      */
@@ -94,7 +92,7 @@ public class MainMenuScreen implements Screen {
         skin = new Skin();
         skin.addRegions(atlas);
         float buttonScale = 0.7f;
-        Table table = new Table();
+        table = new Table();
         table.setDebug(true);
         table.setFillParent(true);
         table.setBackground(new TextureRegionDrawable(new TextureRegion(background)));
@@ -148,6 +146,7 @@ public class MainMenuScreen implements Screen {
      * @return a Button
      */
     public Button createButton(String text, Color color) {
+        final String texthere = text;
         Button.ButtonStyle style = new Button.ButtonStyle();
         style.up = skin.getDrawable(text);
         style.down = skin.getDrawable(text);
@@ -164,7 +163,13 @@ public class MainMenuScreen implements Screen {
 
             public void touchUp(InputEvent event, float x, float y,
                                 int pointer, int button) {
+                if (texthere.equals("play"))
                 game.setScreen(new Person_Comp(game));
+                else if (texthere.equals("multi"))
+                    game.setScreen(new Multiplayer(game));
+                else {
+                }
+//                    game.setScreen(new Settings(game));
             }
 
         });

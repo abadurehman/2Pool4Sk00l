@@ -154,9 +154,9 @@ public class Person_Comp extends GameScreen {
             super.AI = true;
             super.aligned = true;
 
-            float powerShot = (float) ai.minDist / (super.table.getTableInside().getWidth() / 1.5f);
+//            float powerShot = (float) ai.minDist / (super.table.getTableInside().getWidth() / 1.5f);
 
-            super.table.getSlider().setValue(0.6f);
+            super.table.getSlider().setValue(0.3f);//shoot at 30% power
         } else
             super.AI = false;
 

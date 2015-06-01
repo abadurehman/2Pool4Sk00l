@@ -9,12 +9,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Slider;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Align;
-
-
-import java.util.HashMap;
 
 /**
  * Created by SrinjoyMajumdar on 5/12/15.
@@ -88,10 +85,6 @@ public class PoolTable extends Stage {
 //        System.out.println(getTableInside().getHeight() * (540 / 480));
         table.add(slider);
 
-
-
-
-
         pockets = new Vector2[6];
         for (int i = 0; i < 3; i++) {
             pockets[i] = new Vector2((topLeft.x + widthPockets * (i)), topLeft.y);
@@ -101,11 +94,6 @@ public class PoolTable extends Stage {
         }
     }
 
-
-//    public void setPosition(int index, Vector2 position)
-//    {
-//        positions[index] = position;
-//    }
 
     /**
      * Returns which pocket this is/location
